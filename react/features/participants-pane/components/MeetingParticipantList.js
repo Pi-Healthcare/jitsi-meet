@@ -38,7 +38,12 @@ const initialState = Object.freeze(Object.create(null));
 export const MeetingParticipantList = () => {
     const dispatch = useDispatch();
     const isMouseOverMenu = useRef(false);
-    const participants = useSelector(getParticipants, _.isEqual);
+    const participants = useSelector(getRemoteParticipants);
+
+    // This is very important as getRemoteParticipants is not changing its reference object
+    // and we will not re-render on change, but if count changes we will do
+    const participantsCount = useSelector(getRemoteParticipantCount);
+
     const showInviteButton = useSelector(shouldRenderInviteButton);
     const [ raiseContext, setRaiseContext ] = useState<RaiseContext>(initialState);
     const { t } = useTranslation();
@@ -93,10 +98,10 @@ export const MeetingParticipantList = () => {
 
     return (
     <>
-        <Heading>{t('participantsPane.headings.participantsList', { count: participants.length })}</Heading>
+        <Heading>{t('participantsPane.headings.participantsList', { count: participantsCount })}</Heading>
         {showInviteButton && <InviteButton />}
         <div>
-            {participants.map(p => (
+            {participants.values().map(p => (
                 <MeetingParticipantItem
                     isHighlighted = { raiseContext.participant === p }
                     key = { p.id }
